@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_STATES 10
+#define MAX_SYMBOLS 5
+
+// Function to find ε-closure for a given state in the NFA
+void findEpsilonClosure(int nfa[MAX_STATES][MAX_SYMBOLS], int n, int state, int epsilonClosure[MAX_STATES]) {
+    int visited[MAX_STATES] = {0};
+    int stack[MAX_STATES];
+    int top = -1;
+
+    // Initialize stack with the current state
+    stack[++top] = state;
+    visited[state] = 1;
+
+    while (top != -1) {
+        int currentState = stack[top--];
+
+        // Update the ε-closure for the given state
+        epsilonClosure[currentState] = 1;
+
+        // Explore ε-transitions from the current state
+        for (int i = 0; i < n; i++) {
+            if (nfa[currentState][i] == -1) {
+                continue; // No transition for this symbol
+            }
+
+            int nextState = nfa[currentState][i];
+
+            // If the next state has not been visited, push it onto the stack
+            if (!visited[nextState]) {
+                stack[++top] = nextState;
+                visited[nextState] = 1;
+            }
+        }
+    }
+}
+
+int main() {
+    int n; // Number of states
+    int m; // Number of symbols in the alphabet (including ε)
+    int nfa[MAX_STATES][MAX_SYMBOLS];
+
+    // Input the number of states and symbols
+    printf("Enter the number of states: ");
+    scanf("%d", &n);
+    printf("Enter the number of symbols (including epsilon): ");
+    scanf("%d", &m);
+
+    // Input the NFA transitions
+    printf("Enter the NFA transitions (-1 for no transition):\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            printf("Transition from state %d on symbol %d: ", i, j);
+            scanf("%d", &nfa[i][j]);
+        }
+    }
+
+    // Calculate ε-closure for each state
+    int epsilonClosures[MAX_STATES][MAX_STATES];
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            epsilonClosures[i][j] = 0;
+        }
+        findEpsilonClosure(nfa, n, i, epsilonClosures[i]);
+    }
+
+    // Display ε-closures for each state
+    printf("\nε-closures for each state:\n");
+    for (int i = 0; i < n; i++) {
+        printf("ε-closure(%d): { ", i);
+        for (int j = 0; j < n; j++) {
+            if (epsilonClosures[i][j]) {
+                printf("%d ", j);
+            }
+        }
+        printf("}\n");
+    }
+
+    return 0;
+}
